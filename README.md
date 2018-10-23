@@ -30,3 +30,8 @@ It can be reused.
 #Phasers
 We can add more threads dynamically
 It is reuseable
+
+phaser.arriveAndDeregister would deregister all threads
+
+#Exchanger
+It lets 2 threads waith for each other at synchronization point
