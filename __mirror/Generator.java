@@ -26,7 +26,7 @@ public class Generator {
 
         // init scanner
         Scanner input = new Scanner(System.in);
-        System.out.println("Enter 5 digits number separated by -");
+        System.out.println("Enter 6 digits number separated by -");
         // 11-4-9-21-36-40
 
         ticketNumbers = input.nextLine();
@@ -42,20 +42,21 @@ public class Generator {
                 }
             }
 
-            Ticket t = new Ticket(CLIENT_CODE, ticketNumbers);
-            
-            // call server A
-            ServerA a = new ServerA(PORT_NO);
-            a.doTicketUpload(t);
+            // connect
+            Socket sock = new Socket(InetAddress.getLocalHost(), PORT_NO);
+            InputStream in = sock.getInputStream();
 
+            DataOutputStream out = new DataOutputStream(sock.getOutputStream());
+            out.writeUTF(CLIENT_CODE);
+            out.writeUTF(ticketNumbers);
 
         } else {
             System.out.println("Ticket must be 6 digits");
         }
 
     }
-    
-    static void populateTicket(){
-        
+
+    static void populateTicket() {
+
     }
 }

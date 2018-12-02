@@ -27,12 +27,26 @@ public class Generator2 {
 
         // call server A
         ServerA a = new ServerA(PORT_NO);
-        a.doTicketUpload(t1);
-        a.doTicketUpload(t2);
-        a.doTicketUpload(t3);
+        a.start();
+//        a.doTicketUpload(t1);
+//        a.doTicketUpload(t2);
+//        a.doTicketUpload(t3);
+        
+
+        Socket sock = new Socket(InetAddress.getLocalHost(), PORT_NO);
+        InputStream in = sock.getInputStream();
+        
+        DataOutputStream out = new DataOutputStream(sock.getOutputStream());
+        out.writeUTF(CLIENT_CODE);
+        out.writeUTF("12-13-15-21-33-28");
+        
+        out.writeUTF(CLIENT_CODE);
+        out.writeUTF("18-19-9-21-33-24");
+        
+        System.out.println("Sent to Server...");
         
         // test data store size
-        a.fetchTickets(CLIENT_CODE);
+//        a.fetchTickets(CLIENT_CODE);
 
     }
     

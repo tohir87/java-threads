@@ -5,19 +5,19 @@
  */
 package __mirror;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.*;
+import java.util.*;
 
 /**
  *
  * @author tohir
  */
-public class ServerA {
+public class ServerA extends Thread {
 
     private final int port;
     private Ticket ticket;
@@ -28,25 +28,36 @@ public class ServerA {
     public ServerA(int p) throws IOException {
         this.port = p;
 
-        init();
-
     }
 
-    public ServerA(int p, Ticket t) {
-        this.port = p;
-        this.ticket = t;
-
-        init();
-
-    }
-
-    void init() {
+    public void run() {
         data = new ArrayList<Ticket>();
         store = new DataStore(data);
 
         try {
             ss = new ServerSocket(this.port);
             System.out.println("Server A is listening on port: " + this.port);
+            while (true) {
+                Socket sock = ss.accept();
+                System.out.println("connected to a client...");
+
+                DataInputStream input = new DataInputStream(sock.getInputStream());
+//            Ticket tic = (Ticket) objectInputStream.readObject();
+                String seller = input.readUTF();
+                String t_num = input.readUTF();
+                Ticket tic = new Ticket(seller, t_num);
+                System.out.println("recieved data from client:" + seller + t_num);
+
+                try {
+                    doTicketUpload(tic);
+
+                    Thread.sleep(200);
+                    fetchTickets(seller);
+                } catch (InterruptedException e) {
+
+                }
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -63,23 +74,25 @@ public class ServerA {
 
 }
 
-class TicketUploader extends Thread{
+class TicketUploader extends Thread {
+
     DataStore store;
     Ticket ticket;
-    
+
     public TicketUploader(DataStore s, Ticket t) {
         this.store = s;
         this.ticket = t;
     }
-    
-    public void run(){
-        store.add(this.ticket);
+
+    public void run() {
+        this.store.add(this.ticket);
     }
 }
 
 class DataStore {
+
     private ArrayList<Ticket> data;
-    
+
     public DataStore(ArrayList<Ticket> d) {
         data = d;
     }
@@ -93,7 +106,7 @@ class DataStore {
             System.out.println("...about to add ticket");
             data.add(t);
             System.out.println("...ticke added");
-            
+
         } finally {
             lock.unlock();
         }
