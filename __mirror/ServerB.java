@@ -35,15 +35,16 @@ public class ServerB {
             Ticket tic = new Ticket(seller, t_num);
             System.out.println("recieved data from client:" + seller + t_num);
 
+            // start the uploader thread
             new TicketUploader(store, tic).start();
+            
+            
             fetchTickets(seller);
         }
 
     }
 
-    static void doTicketUpload(Ticket t) {
-        new TicketUploader(store, t).start();
-    }
+   
 
     static void fetchTickets(String sellerCode) {
         System.out.println("size of data store" + data.size());

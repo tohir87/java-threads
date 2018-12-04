@@ -78,14 +78,19 @@ class TicketUploader extends Thread {
 
     DataStore store;
     Ticket ticket;
+    Buffer buffer;
 
     public TicketUploader(DataStore s, Ticket t) {
         this.store = s;
         this.ticket = t;
+        this.buffer = new Buffer();
     }
 
     public void run() {
+        // send a copy of ticket to data store
         this.store.add(this.ticket);
+        // send a copy of ticket to buffer
+        this.buffer.put(this.ticket);
     }
 }
 
@@ -97,7 +102,6 @@ class DataStore {
         data = d;
     }
 
-//    private ArrayList<Ticket> data = new ArrayList<Ticket>();
     private Lock lock = new ReentrantLock();
 
     void add(Ticket t) {
@@ -138,4 +142,66 @@ class DataStore {
         }
     }
 
+}
+
+class Buffer{
+   private int max;
+   private int size = 1000;
+   private ArrayList<Ticket> buffer;
+   private Semaphore empty;  // control consumer
+   private Semaphore full;   // control producer
+   private Lock lock = new ReentrantLock();
+   private WriterReaderServer WRServer;
+   private DataStore store;
+   
+   private final int READER_PORT = 2000;
+   private final int WRITER_PORT = 2001;
+   
+   public Buffer(){
+   	 buffer = new ArrayList<Ticket>();
+   	 empty = new Semaphore(0);
+   	 full = new Semaphore(size);
+     
+   }
+
+   public void put(Ticket x){
+   	 try{
+   		full.acquire();
+   	 }
+   	 catch(InterruptedException e){}
+   	 // synchronize update of buffer
+   	 lock.lock();
+   	 try{
+   	 	buffer.add(x);
+        
+   	    size++;
+   	    empty.release();
+   	 }finally{
+         new WriterReaderServer(READER_PORT, WRITER_PORT, x, store);
+   	 	lock.unlock();
+   	 }
+   }
+   
+   public Ticket get(){
+   		try{
+   			empty.acquire();
+   		}
+   		catch(InterruptedException e){}
+   		// synchronize update of buffer
+        lock.lock();
+        try{
+        	Ticket temp = buffer.get(0);
+   	      buffer.remove(0);
+   	      size--;
+   	      full.release();
+   	      return temp;
+        }finally{
+        	lock.unlock();
+        }
+   }
+
+}
+
+class Writer{
+    
 }

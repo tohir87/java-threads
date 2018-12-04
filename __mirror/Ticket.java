@@ -24,26 +24,5 @@ public class Ticket{
     public String toString() {
         return "Ticket{" + "ticketNumber=" + ticketNumber + ", sellerCode=" + sellerCode + '}';
     }
-    
-    //Methods used to read and write to streams over sockets
-  public void writeOutputStream(DataOutputStream out) {
-        try {
-            out.writeUTF(this.sellerCode);
-            out.writeUTF(this.ticketNumber.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void readInputStream(DataInputStream in) {
-        try {
-            this.sellerCode = in.readUTF();
-            this.ticketNumber = in.readUTF();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    
 
 }
